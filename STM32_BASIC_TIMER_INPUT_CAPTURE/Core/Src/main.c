@@ -18,6 +18,8 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "stdio.h"
+
 #define TRUE 1
 #define FALSE 0
 #define SYS_CLOCK_FREQ_50_MHZ 50
@@ -39,12 +41,22 @@ void LSE_Configuration(void);
 TIM_HandleTypeDef htimer2;
 uint8_t FLatency = 0;
 uint32_t rcc_frequency = 0;
+uint32_t input_captures[2] = {0};
+uint8_t count = 0;
+uint8_t is_capture_done = FALSE;
+double timer2_count_freq;
+double timer2_count_resolution;
+double user_signal_time_period;
+double capture_difference;
+double user_signal_frequency;
+char user_message[100];
+
 int main(void)
 {
 
  HAL_Init();
 
-  SystemClock_Config(SYS_CLOCK_FREQ_80_MHZ);
+  SystemClock_Config(SYS_CLOCK_FREQ_50_MHZ);
 
   GPIO_INIT();
 
@@ -52,13 +64,49 @@ int main(void)
 
   //LSE_Configuration();
 
+  HAL_TIM_IC_Start_IT(&htimer2, TIM_CHANNEL_1);
+
   while (1)
   {
 	  rcc_frequency = HAL_RCC_GetHCLKFreq();
 	  HAL_Delay(1000);
+
+	  if(is_capture_done)
+	  {
+		  if(input_captures[1] > input_captures[0])
+		  capture_difference = input_captures[1] - input_captures[0];
+		  else
+		  {
+			  capture_difference = (0xFFFFFFFF - input_captures[1]) + input_captures[0];
+		  }
+	  }
+
+	  timer2_count_freq = (HAL_RCC_GetPCLK1Freq() * 2) / htimer2.Init.Prescaler;
+	  timer2_count_resolution = 1 / timer2_count_freq;
+	  user_signal_time_period = capture_difference * timer2_count_resolution;
+	  user_signal_frequency = 1 / user_signal_time_period;
+
+	  sprintf(user_message, "Frequency of the signal applied: %.2f\r\n", user_signal_frequency);
+
   }
 
   return 0;
+
+}
+
+void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
+{
+	if(count == 0) {
+		input_captures[0] = __HAL_TIM_GET_COMPARE(htim, TIM_CHANNEL_1);
+		count++;
+	}
+	else if (count == 1)
+	{
+		input_captures[1] = __HAL_TIM_GET_COMPARE(htim, TIM_CHANNEL_1);
+		is_capture_done = TRUE;
+		count = 0;
+	}
+
 
 }
 

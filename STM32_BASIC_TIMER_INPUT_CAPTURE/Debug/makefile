@@ -61,7 +61,7 @@ main-build: STM32_BASIC_TIMER_INPUT_CAPTURE.elf secondary-outputs
 
 # Tool invocations
 STM32_BASIC_TIMER_INPUT_CAPTURE.elf STM32_BASIC_TIMER_INPUT_CAPTURE.map: $(OBJS) $(USER_OBJS) E:\Udemy\Mastering\ uC\WorkSpace\STM32_BASIC_TIMER_INPUT_CAPTURE\STM32F446RETX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "STM32_BASIC_TIMER_INPUT_CAPTURE.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"E:\Udemy\Mastering uC\WorkSpace\STM32_BASIC_TIMER_INPUT_CAPTURE\STM32F446RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="STM32_BASIC_TIMER_INPUT_CAPTURE.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+	arm-none-eabi-gcc -o "STM32_BASIC_TIMER_INPUT_CAPTURE.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"E:\Udemy\Mastering uC\WorkSpace\STM32_BASIC_TIMER_INPUT_CAPTURE\STM32F446RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="STM32_BASIC_TIMER_INPUT_CAPTURE.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -u _printf_float -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
